@@ -1,4 +1,58 @@
-const EventEmitter = require('./CustomEventEmitter');
+class EventEmitter {
+  listeners = {}; // key-value pair
+
+  addListener(eventName, fn) {
+    if (this.listeners[eventName]) {
+      this.listeners[eventName].add(fn);
+    } else {
+      this.listeners[eventName] = new Set();
+      this.listeners[eventName].add(fn);
+    }
+  }
+
+  on(eventName, fn) {
+    this.addListener(eventName, fn);
+  }
+
+  removeListener(eventName, fn) {
+    if (this.listeners[eventName]) {
+      this.listeners[eventName].delete(fn);
+    }
+  }
+
+  off(eventName, fn) {
+    this.removeListener(eventName, fn);
+  }
+
+  once(eventName, fn) {
+    const onceFn = (...args) => {
+      fn(...args);
+      this.removeListener(eventName, onceFn);
+    };
+    this.addListener(eventName, onceFn);
+  }
+
+  emit(eventName, ...args) {
+    if (this.listeners[eventName]) {
+      this.listeners[eventName].forEach((fn) => fn(...args));
+    }
+  }
+
+  listenerCount(eventName) {
+    if (this.listeners[eventName]) {
+      return this.listeners[eventName].size;
+    } else {
+      return 0;
+    }
+  }
+
+  rawListeners(eventName) {
+    return Array.from(this.listeners[eventName]);
+  }
+}
+
+module.exports = EventEmitter;
+
 const myEmitter = new EventEmitter();
 
 function c1() {
